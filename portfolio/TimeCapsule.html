@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كبسولة الزمن | مهمة أبطال الدراسات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Cairo', sans-serif; background-color: #000; color: white; user-select: none; }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
+        .glass-panel { background: rgba(10, 15, 30, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(0, 229, 255, 0.2); box-shadow: 0 0 40px rgba(0, 229, 255, 0.1); }
+        .btn-glow { transition: all 0.3s; position: relative; overflow: hidden; }
+        .btn-glow:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 30px rgba(0, 229, 255, 0.4); border-color: rgba(0, 229, 255, 0.8); }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .shake-danger { animation: shake 0.5s ease-in-out; box-shadow: 0 0 50px rgba(255, 0, 0, 0.5) !important; border-color: red !important; }
+        .correct-pulse { background-color: rgba(0, 255, 100, 0.2) !important; border-color: #00ff66 !important; box-shadow: 0 0 50px rgba(0, 255, 100, 0.6) !important; }
+        .energy-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); transition: width 0.8s; box-shadow: 0 0 20px #00d2ff; }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <main class="relative z-10 w-full h-screen flex flex-col items-center justify-center p-6">
+        <div id="game-card" class="glass-panel w-full max-w-4xl rounded-[2.5rem] p-8 text-center transition-all">
+            <div class="mb-8">
+                <h1 class="text-4xl font-black text-cyan-400 mb-4 drop-shadow-[0_0_10px_rgba(0,229,255,0.5)]">🚀 بوابة الزمن</h1>
+                <div class="flex items-center gap-4">
+                    <span class="text-cyan-400 font-bold">الطاقة:</span>
+                    <div class="flex-grow h-5 bg-white/10 rounded-full overflow-hidden border border-cyan-500/30">
+                        <div id="energy-bar" class="energy-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="question-area" class="mb-8 min-h-[100px] flex items-center justify-center">
+                <h2 id="question-text" class="text-3xl font-bold text-white"></h2>
+            </div>
+
+            <div id="options-area" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+            <div id="win-area" class="hidden flex-col items-center py-10">
+                <h2 class="text-5xl font-black text-green-400 mb-6 animate-bounce">اكتمل الشحن! 🏆</h2>
+                <button onclick="location.reload()" class="px-8 py-3 bg-green-500 text-black font-black rounded-xl hover:scale-110 transition-transform">إعادة المهمة 🔄</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const questionsData = [
+            { text: "من هو الملك الذي بنى الهرم الأكبر؟", options: ["خفرع", "خوفو", "منكاورع", "زوسر"], answer: "خوفو" },
+            { text: "أكبر قارة في العالم من حيث المساحة هي...", options: ["إفريقيا", "أوروبا", "آسيا", "أمريكا الشمالية"], answer: "آسيا" },
+            { text: "مدينة مصرية تُلقب بمدينة الألف مئذنة؟", options: ["الإسكندرية", "الأقصر", "القاهرة", "أسوان"], answer: "القاهرة" },
+            { text: "الملك الذي وحد القطرين هو؟", options: ["مينا (نعرمر)", "أحمس", "رمسيس الثاني", "توت عنخ آمون"], answer: "مينا (نعرمر)" },
+            { text: "البحر الذي يحد مصر من جهة الشرق هو...", options: ["البحر المتوسط", "البحر الميت", "البحر الأسود", "البحر الأحمر"], answer: "البحر الأحمر" }
+        ];
+
+        // خلط الأسئلة عند بداية كل لعبة
+        const questions = [...questionsData].sort(() => Math.random() - 0.5);
+        let currentQIndex = 0, score = 0, isProcessing = false, warpSpeed = 0;
+
+        // إعداد الـ 3D (Warp Speed)
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+        camera.position.z = 1;
+        camera.rotation.x = Math.PI/2;
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        
+        const starGeo = new THREE.BufferGeometry();
+        const posArray = new Float32Array(3000 * 3);
+        for(let i=0; i < 9000; i++) posArray[i] = (Math.random() - 0.5) * 600;
+        starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x00e5ff, size: 1.5 }));
+        scene.add(stars);
+
+        function animate() {
+            const positions = starGeo.attributes.position.array;
+            for(let i=1; i < 9000; i+=3) {
+                positions[i] -= (0.5 + warpSpeed);
+                if(positions[i] < -200) positions[i] = 200;
+            }
+            starGeo.attributes.position.needsUpdate = true;
+            if(warpSpeed > 0) warpSpeed -= 0.1;
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        function loadQuestion() {
+            if (currentQIndex >= questions.length) {
+                document.getElementById('question-area').classList.add('hidden');
+                document.getElementById('options-area').classList.add('hidden');
+                document.getElementById('win-area').classList.remove('hidden');
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.7 } });
+                return;
+            }
+
+            const q = questions[currentQIndex];
+            document.getElementById('question-text').innerText = q.text;
+            const area = document.getElementById('options-area');
+            area.innerHTML = '';
+            
+            // خلط الخيارات أيضاً
+            const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+            
+            shuffledOptions.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-glow w-full py-5 bg-white/5 border-2 border-cyan-500/30 rounded-2xl text-xl font-bold text-white';
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswer(btn, opt === q.answer);
+                area.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(btn, isCorrect) {
+            if(isProcessing) return;
+            isProcessing = true;
+            if (isCorrect) {
+                btn.classList.add('correct-pulse');
+                score++;
+                warpSpeed = 15;
+                document.getElementById('energy-bar').style.width = (score / questions.length) * 100 + '%';
+                confetti({ particleCount: 50, colors: ['#00ff66'] });
+                setTimeout(() => { currentQIndex++; loadQuestion(); isProcessing = false; }, 800);
+            } else {
+                document.getElementById('game-card').classList.add('shake-danger');
+                setTimeout(() => { document.getElementById('game-card').classList.remove('shake-danger'); isProcessing = false; }, 500);
+            }
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>

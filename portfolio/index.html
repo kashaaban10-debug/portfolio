@@ -1,0 +1,559 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كريم شعبان | خبير تعليم الدراسات الاجتماعية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            background-color: #050505; /* أسود فخم */
+            color: white; 
+            overflow-x: hidden; 
+            font-family: 'Cairo', sans-serif; /* خط عربي أنيق */
+        }
+        
+        /* إخفاء شريط التمرير مع الحفاظ على القدرة على التمرير */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #452c08; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+
+        /* ستايل الـ 3D في الخلفية */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.8; 
+        }
+
+        .glass {
+            background: rgba(20, 20, 20, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-premium {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(245, 158, 11, 0.3); /* توهج ذهبي علوي */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+        }
+        
+        .tilt-card { 
+            transition: transform 0.2s ease-out; 
+            transform-style: preserve-3d; 
+        }
+
+        .glow-hover:hover {
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
+            border-color: rgba(245, 158, 11, 0.5);
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.-inset-1{inset:-0.25rem}.inset-0{inset:0px}.bottom-6{bottom:1.5rem}.right-16{right:4rem}.right-6{right:1.5rem}.top-4{top:1rem}.z-10{z-index:10}.z-50{z-index:50}.order-1{order:1}.order-2{order:2}.mx-auto{margin-left:auto;margin-right:auto}.-mt-10{margin-top:-2.5rem}.mb-1{margin-bottom:0.25rem}.mb-10{margin-bottom:2.5rem}.mb-16{margin-bottom:4rem}.mb-2{margin-bottom:0.5rem}.mb-20{margin-bottom:5rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mt-6{margin-top:1.5rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.aspect-\[9\/16\]{aspect-ratio:9/16}.h-10{height:2.5rem}.h-14{height:3.5rem}.h-2{height:0.5rem}.h-5{height:1.25rem}.h-80{height:20rem}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-10{width:2.5rem}.w-14{width:3.5rem}.w-2{width:0.5rem}.w-5{width:1.25rem}.w-full{width:100%}.max-w-7xl{max-width:80rem}.max-w-\[22rem\]{max-width:22rem}.max-w-sm{max-width:24rem}.translate-y-\[100\%\]{--tw-translate-y:100%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-default{cursor:default}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-12{gap:3rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.overflow-hidden{overflow:hidden}.scroll-smooth{scroll-behavior:smooth}.whitespace-nowrap{white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-\[2\.5rem\]{border-radius:2.5rem}.rounded-\[2rem\]{border-radius:2rem}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-y{border-top-width:1px;border-bottom-width:1px}.border-t{border-top-width:1px}.border-amber-500\/20{border-color:rgb(245 158 11 / 0.2)}.border-amber-500\/30{border-color:rgb(245 158 11 / 0.3)}.border-cyan-500\/20{border-color:rgb(6 182 212 / 0.2)}.border-gray-500\/20{border-color:rgb(107 114 128 / 0.2)}.border-red-500\/20{border-color:rgb(239 68 68 / 0.2)}.border-transparent{border-color:transparent}.border-white\/10{border-color:rgb(255 255 255 / 0.1)}.border-white\/5{border-color:rgb(255 255 255 / 0.05)}.bg-\[\#25D366\]{--tw-bg-opacity:1;background-color:rgb(37 211 102 / var(--tw-bg-opacity, 1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.bg-amber-500\/10{background-color:rgb(245 158 11 / 0.1)}.bg-amber-500\/5{background-color:rgb(245 158 11 / 0.05)}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-black\/40{background-color:rgb(0 0 0 / 0.4)}.bg-black\/50{background-color:rgb(0 0 0 / 0.5)}.bg-cyan-500\/10{background-color:rgb(6 182 212 / 0.1)}.bg-cyan-500\/5{background-color:rgb(6 182 212 / 0.05)}.bg-gray-500\/10{background-color:rgb(107 114 128 / 0.1)}.bg-red-500\/10{background-color:rgb(239 68 68 / 0.1)}.bg-red-500\/5{background-color:rgb(239 68 68 / 0.05)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-white\/5{background-color:rgb(255 255 255 / 0.05)}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.bg-gradient-to-bl{background-image:linear-gradient(to bottom left, var(--tw-gradient-stops))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-amber-200{--tw-gradient-from:#fde68a var(--tw-gradient-from-position);--tw-gradient-to:rgb(253 230 138 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-500{--tw-gradient-from:#f59e0b var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-500\/0{--tw-gradient-from:rgb(245 158 11 / 0) var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-500\/20{--tw-gradient-from:rgb(245 158 11 / 0.2) var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-white\/10{--tw-gradient-from:rgb(255 255 255 / 0.1) var(--tw-gradient-from-position);--tw-gradient-to:rgb(255 255 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-amber-400{--tw-gradient-to:rgb(251 191 36 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #fbbf24 var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-amber-500\/10{--tw-gradient-to:rgb(245 158 11 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), rgb(245 158 11 / 0.1) var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-amber-500\/0{--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position)}.to-transparent{--tw-gradient-to:transparent var(--tw-gradient-to-position)}.to-yellow-600{--tw-gradient-to:#ca8a04 var(--tw-gradient-to-position)}.bg-clip-text{-webkit-background-clip:text;background-clip:text}.object-cover{object-fit:cover}.p-2{padding:0.5rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-8{padding-left:2rem;padding-right:2rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-20{padding-top:5rem;padding-bottom:5rem}.py-24{padding-top:6rem;padding-bottom:6rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-20{padding-bottom:5rem}.pt-20{padding-top:5rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-5xl{font-size:3rem;line-height:1}.text-6xl{font-size:3.75rem;line-height:1}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-light{font-weight:300}.font-semibold{font-weight:600}.leading-relaxed{line-height:1.625}.tracking-wide{letter-spacing:0.025em}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-amber-400\/80{color:rgb(251 191 36 / 0.8)}.text-amber-500\/20{color:rgb(245 158 11 / 0.2)}.text-black{--tw-text-opacity:1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.text-cyan-300{--tw-text-opacity:1;color:rgb(103 232 249 / var(--tw-text-opacity, 1))}.text-cyan-400{--tw-text-opacity:1;color:rgb(34 211 238 / var(--tw-text-opacity, 1))}.text-gray-200{--tw-text-opacity:1;color:rgb(229 231 235 / var(--tw-text-opacity, 1))}.text-gray-300{--tw-text-opacity:1;color:rgb(209 213 219 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.text-red-500{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.text-transparent{color:transparent}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-0{opacity:0}.opacity-20{opacity:0.2}.shadow-\[0_0_15px_rgba\(245\2c 158\2c 11\2c 0\.15\)\]{--tw-shadow:0 0 15px rgba(245,158,11,0.15);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_20px_rgba\(245\2c 158\2c 11\2c 0\.3\)\]{--tw-shadow:0 0 20px rgba(245,158,11,0.3);--tw-shadow-colored:0 0 20px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_20px_rgba\(37\2c 211\2c 102\2c 0\.4\)\]{--tw-shadow:0 0 20px rgba(37,211,102,0.4);--tw-shadow-colored:0 0 20px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_40px_rgba\(245\2c 158\2c 11\2c 0\.15\)\]{--tw-shadow:0 0 40px rgba(245,158,11,0.15);--tw-shadow-colored:0 0 40px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_50px_rgba\(245\2c 158\2c 11\2c 0\.2\)\]{--tw-shadow:0 0 50px rgba(245,158,11,0.2);--tw-shadow-colored:0 0 50px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.blur-2xl{--tw-blur:blur(40px);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.blur-lg{--tw-blur:blur(16px);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.blur-xl{--tw-blur:blur(24px);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-\[0_0_10px_rgba\(0\2c 229\2c 255\2c 0\.5\)\]{--tw-drop-shadow:drop-shadow(0 0 10px rgba(0,229,255,0.5));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-\[0_0_10px_rgba\(239\2c 68\2c 68\2c 0\.5\)\]{--tw-drop-shadow:drop-shadow(0 0 10px rgba(239,68,68,0.5));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-1000{transition-duration:1000ms}.duration-300{transition-duration:300ms}.duration-500{transition-duration:500ms}.duration-700{transition-duration:700ms}.hover\:-translate-y-1:hover{--tw-translate-y:-0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:scale-110:hover{--tw-scale-x:1.1;--tw-scale-y:1.1;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:border-cyan-400\/50:hover{border-color:rgb(34 211 238 / 0.5)}.hover\:border-red-500\/50:hover{border-color:rgb(239 68 68 / 0.5)}.hover\:bg-amber-500:hover{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.hover\:bg-white\/5:hover{background-color:rgb(255 255 255 / 0.05)}.hover\:from-amber-400:hover{--tw-gradient-from:#fbbf24 var(--tw-gradient-from-position);--tw-gradient-to:rgb(251 191 36 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-yellow-500:hover{--tw-gradient-to:#eab308 var(--tw-gradient-to-position)}.hover\:shadow-\[0_0_25px_rgba\(0\2c 229\2c 255\2c 0\.4\)\]:hover{--tw-shadow:0 0 25px rgba(0,229,255,0.4);--tw-shadow-colored:0 0 25px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.hover\:shadow-\[0_0_30px_rgba\(245\2c 158\2c 11\2c 0\.5\)\]:hover{--tw-shadow:0 0 30px rgba(245,158,11,0.5);--tw-shadow-colored:0 0 30px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.hover\:shadow-\[0_0_30px_rgba\(37\2c 211\2c 102\2c 0\.7\)\]:hover{--tw-shadow:0 0 30px rgba(37,211,102,0.7);--tw-shadow-colored:0 0 30px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.hover\:shadow-\[0_0_60px_rgba\(245\2c 158\2c 11\2c 0\.3\)\]:hover{--tw-shadow:0 0 60px rgba(245,158,11,0.3);--tw-shadow-colored:0 0 60px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.group:hover .group-hover\:-translate-x-1{--tw-translate-x:-0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:-translate-x-2{--tw-translate-x:-0.5rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:translate-y-0{--tw-translate-y:0px;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:scale-110{--tw-scale-x:1.1;--tw-scale-y:1.1;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:bg-transparent{background-color:transparent}.group:hover .group-hover\:text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:opacity-100{opacity:1}.group:hover .group-hover\:opacity-40{opacity:0.4}.group:hover .group-hover\:shadow-\[0_0_20px_rgba\(245\2c 158\2c 11\2c 0\.4\)\]{--tw-shadow:0 0 20px rgba(245,158,11,0.4);--tw-shadow-colored:0 0 20px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}@media (min-width: 768px){.md\:order-1{order:1}.md\:order-2{order:2}.md\:mt-0{margin-top:0px}.md\:w-1\/2{width:50%}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:p-10{padding:2.5rem}.md\:p-12{padding:3rem}.md\:pt-0{padding-top:0px}.md\:text-5xl{font-size:3rem;line-height:1}.md\:text-6xl{font-size:3.75rem;line-height:1}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}}</style>
+<style>
+/* ===== EXPERIMENTAL 3D HERO — merged into the original portfolio ===== */
+:root{--v9-gold:#e7a82f;--v9-gold2:#ffd878}
+#earth{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;background:#020304}
+.v9-noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E")}
+.v9-nav{position:fixed;top:0;left:0;right:0;height:78px;z-index:80;display:flex;align-items:center;justify-content:space-between;padding:0 4.5vw;background:linear-gradient(180deg,rgba(3,4,5,.88),rgba(3,4,5,0));backdrop-filter:blur(5px)}
+.v9-brand{display:flex;gap:11px;align-items:center;font-weight:900}.v9-mark{width:40px;height:40px;border:1px solid var(--v9-gold);border-radius:50%;display:grid;place-items:center;color:var(--v9-gold);box-shadow:0 0 28px rgba(231,168,47,.18)}.v9-brand small{display:block;color:var(--v9-gold2);font-size:9px;letter-spacing:1.8px}
+.v9-links{display:flex;gap:25px;color:#ddd;font-size:13px}.v9-links a{color:inherit;text-decoration:none;position:relative}.v9-links a:after{content:"";position:absolute;right:0;bottom:-9px;width:0;height:2px;background:var(--v9-gold);transition:.3s}.v9-links a:hover:after{width:100%}
+.v9-skip{border:1px solid rgba(231,168,47,.5);background:rgba(0,0,0,.28);color:#ffd878;border-radius:999px;padding:9px 14px;font:700 12px Cairo;cursor:pointer}
+.v9-hero{min-height:100vh;position:relative;z-index:10;display:flex;align-items:flex-end;justify-content:center;text-align:center;padding:0 20px 8vh;overflow:hidden}
+.v9-hero:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 43%,transparent 0 22%,rgba(0,0,0,.08) 42%,rgba(0,0,0,.68) 100%);z-index:-1}
+.v9-panel{position:absolute;top:19%;right:5vw;width:min(290px,28vw);text-align:right;padding:18px 20px;border:1px solid rgba(255,203,88,.18);background:rgba(7,8,9,.3);backdrop-filter:blur(12px);border-radius:18px;box-shadow:0 20px 80px rgba(0,0,0,.3)}
+.v9-panel h3{margin:0 0 7px;font-size:13px;color:#ffd878}.v9-panel p{margin:0;color:#aeb2bb;font-size:11px;line-height:1.9}.v9-chip{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:7px 10px;border-radius:999px;background:rgba(231,168,47,.09);border:1px solid rgba(231,168,47,.18);font-size:10px;color:#f7d37a}.v9-pulse{width:6px;height:6px;border-radius:50%;background:#ffb11b;box-shadow:0 0 13px #ffb11b;animation:v9pulse 1.5s infinite}@keyframes v9pulse{50%{transform:scale(1.7);opacity:.45}}
+.v9-label{position:absolute;padding:6px 10px;border:1px solid rgba(255,210,120,.22);border-radius:999px;background:rgba(0,0,0,.26);backdrop-filter:blur(8px);color:#ddd;font-size:10px;letter-spacing:.2px;box-shadow:0 0 20px rgba(231,168,47,.07);animation:v9float 4s ease-in-out infinite}.v9-eg{top:37%;left:34%}.v9-med{top:27%;left:56%;animation-delay:-1s}.v9-af{top:55%;left:62%;animation-delay:-2s}.v9-asia{top:31%;right:16%;animation-delay:-3s}@keyframes v9float{50%{transform:translateY(-7px)}}
+.v9-copy{position:relative;z-index:5;max-width:900px}.v9-eyebrow{font-size:12px;color:#e9b341;font-weight:800;margin-bottom:10px;letter-spacing:.2px}.v9-copy h1{margin:0;font-size:clamp(42px,6vw,88px);line-height:1.02;font-weight:900;text-shadow:0 10px 45px rgba(0,0,0,.75)}.v9-copy h1 span{color:#ffb11b}.v9-copy p{margin:12px 0 24px;color:#c5c8cf;font-size:14px}.v9-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.v9-btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:12px;padding:12px 18px;font-weight:900;font-size:12px;border:1px solid rgba(255,255,255,.14);color:#fff;background:rgba(0,0,0,.3);backdrop-filter:blur(8px);transition:.25s}.v9-btn:hover{transform:translateY(-3px);border-color:rgba(255,210,120,.5)}.v9-btn.primary{background:linear-gradient(135deg,#ffbe32,#e8940b);color:#090909;border-color:transparent;box-shadow:0 12px 35px rgba(230,145,10,.2)}
+.v9-scroll{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-size:10px;color:#9ea2aa;display:flex;flex-direction:column;align-items:center;gap:5px}.v9-mouse{width:16px;height:26px;border:1px solid rgba(255,255,255,.35);border-radius:10px;position:relative}.v9-mouse:after{content:"";position:absolute;top:5px;left:50%;width:2px;height:5px;background:#ffbd3d;border-radius:2px;transform:translateX(-50%);animation:v9wheel 1.4s infinite}@keyframes v9wheel{70%{transform:translate(-50%,7px);opacity:.15}}
+/* keep the original sections visible above the cinematic canvas */
+body>section, body>footer{position:relative;z-index:10}
+@media(max-width:900px){.v9-links{display:none}.v9-panel{top:14%;right:5vw;width:230px}.v9-eg{left:12%;top:39%}.v9-med{left:53%;top:25%}.v9-af{left:64%;top:56%}.v9-asia{right:7%;top:34%}}
+@media(max-width:600px){.v9-nav{height:66px}.v9-panel{display:none}.v9-hero{padding-bottom:10vh}.v9-copy h1{font-size:42px}.v9-copy p{font-size:12px}.v9-label{font-size:8px;padding:5px 7px}.v9-eg{left:8%;top:42%}.v9-med{left:48%;top:31%}.v9-af{left:58%;top:58%}.v9-asia{right:4%;top:39%}}
+</style>
+
+
+<style>
+.v9-label{position:fixed;transform:translate(-50%,-50%);top:0;left:0;pointer-events:none;z-index:25;white-space:nowrap;}
+.v9-europe{animation-delay:-.5s}
+</style>
+</head>
+<body class="text-white relative">
+<canvas id="earth" aria-hidden="true"></canvas>
+<div class="v9-noise" aria-hidden="true"></div>
+
+<nav class="v9-nav">
+  <div class="v9-brand"><div class="v9-mark">✦</div><div><b>كريم شعبان</b><small>SOCIAL STUDIES TEACHER</small></div></div>
+  <div class="v9-links">
+    <a href="#games">الألعاب</a>
+    <a href="#library">خزانة المعرفة</a>
+    <a href="#about">عن كريم</a>
+    <a href="#testimonials">آراء الطلاب</a>
+  </div>
+  <button class="v9-skip" onclick="document.querySelector('#games').scrollIntoView({behavior:'smooth'})">ابدأ الرحلة ⟶</button>
+</nav>
+
+<section class="v9-hero" id="home">
+  <div class="v9-panel">
+    <h3>مركز الرحلة</h3>
+    <p>حرّك المؤشر حول الكوكب واكتشف كيف تتحول الخريطة إلى قصة، والقصة إلى تجربة تعليمية.</p>
+    <div class="v9-chip"><i class="v9-pulse"></i> مصر • نقطة البداية</div>
+  </div>
+  <div class="v9-label v9-eg">🇪🇬 مصر • البداية</div>
+  <div class="v9-label v9-med">البحر المتوسط</div>
+  <div class="v9-label v9-af">أفريقيا • الحضارات</div>
+  <div class="v9-label v9-asia">آسيا • الطرق والثقافات</div>
+  <div class="v9-copy">
+    <div class="v9-eyebrow">رحلة تبدأ من الخريطة… وتصل إلى الإنسان</div>
+    <h1>أهلاً بك في <span>عالم كريم شعبان</span></h1>
+    <p>دراسات اجتماعية • جغرافيا • تاريخ • تعلم تفاعلي</p>
+    <div class="v9-actions">
+      <a class="v9-btn primary" href="#games">اكتشف الألعاب</a>
+      <a class="v9-btn" href="#library">افتح خزانة المعرفة</a>
+    </div>
+  </div>
+  <div class="v9-scroll"><div class="v9-mouse"></div>اسحب لأسفل</div>
+</section>
+
+<!-- قسم الإحصائيات -->
+    <section class="max-w-7xl mx-auto px-6 pb-20 relative z-10 -mt-10 md:mt-0">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="tilt-card glass p-6 rounded-3xl glow-hover flex items-center gap-5 cursor-default">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-transparent border border-amber-500/30 flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+                    ⭐
+                </div>
+                <div>
+                    <h3 class="text-2xl font-black text-white mb-1">عام من التميز</h3>
+                    <p class="text-amber-400/80 text-sm">شغف وطاقة في المرحلة الإعدادية</p>
+                </div>
+            </div>
+
+            <div class="tilt-card glass p-6 rounded-3xl glow-hover flex items-center gap-5 cursor-default">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-transparent border border-amber-500/30 flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+                    💡
+                </div>
+                <div>
+                    <h3 class="text-2xl font-black text-white mb-1">أسلوب مبتكر</h3>
+                    <p class="text-amber-400/80 text-sm">نكسر حاجز التلقين والملل</p>
+                </div>
+            </div>
+
+            <div class="tilt-card glass p-6 rounded-3xl glow-hover flex items-center gap-5 cursor-default">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-transparent border border-amber-500/30 flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+                    🎯
+                </div>
+                <div>
+                    <h3 class="text-2xl font-black text-white mb-1">أدوات تفاعلية</h3>
+                    <p class="text-amber-400/80 text-sm">عروض تقديمية وألعاب متنوعة</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم الألعاب التعليمية -->
+    <section id="games" class="max-w-7xl mx-auto px-6 py-20 relative z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600 mb-4">ألعابي التعليمية</h2>
+            <p class="text-gray-400 text-lg">نماذج من ابتكاراتي لتحويل المنهج إلى تحدي ممتع</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <a href="Game.html" target="_blank" class="block">
+                <div class="tilt-card glass p-8 rounded-3xl glow-hover group relative overflow-hidden h-full flex flex-col justify-between border-2 border-transparent hover:border-red-500/50 transition-colors">
+                    <div class="absolute inset-0 bg-red-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500"></div>
+                    
+                    <div class="relative z-10">
+                        <span class="inline-block px-3 py-1 mb-4 text-xs font-bold text-red-500 bg-red-500/10 rounded-full border border-red-500/20">
+                            للمرحلة الإعدادية 🔴
+                        </span>
+                        
+                        <h3 class="text-2xl font-black mb-4 text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">المهمة المستحيلة</h3>
+                        <p class="text-gray-300 leading-relaxed">أرشيف أسرار الحملة الفرنسية. هل تستطيع فك الشفرة واستنتاج رمز المرور السري لإنقاذ التاريخ؟</p>
+                    </div>
+
+                    <div class="relative z-10 mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <span class="text-sm font-bold text-gray-400 group-hover:text-white transition-colors">افتح اللعبة</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 transform group-hover:-translate-x-2 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="TimeCapsule.html" target="_blank" class="block">
+                <div class="tilt-card glass p-8 rounded-3xl group relative overflow-hidden h-full flex flex-col justify-between border-2 border-transparent hover:border-cyan-400/50 hover:shadow-[0_0_25px_rgba(0,229,255,0.4)] transition-all">
+                    <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500"></div>
+                    
+                    <div class="relative z-10">
+                        <span class="inline-block px-3 py-1 mb-4 text-xs font-bold text-cyan-300 bg-cyan-500/10 rounded-full border border-cyan-500/20">
+                            للمرحلة الابتدائية 🚀
+                        </span>
+                        
+                        <h3 class="text-2xl font-black mb-4 text-cyan-400 drop-shadow-[0_0_10px_rgba(0,229,255,0.5)]">كبسولة الزمن ⏳</h3>
+                        <p class="text-gray-300 leading-relaxed">مهمة تفاعلية مذهلة لأبطال الابتدائي. أجب عن الأسئلة، اشحن طاقة الكبسولة، وسافر عبر الزمن!</p>
+                    </div>
+
+                    <div class="relative z-10 mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <span class="text-sm font-bold text-gray-400 group-hover:text-white transition-colors">افتح اللعبة</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-400 transform group-hover:-translate-x-2 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+            
+            <div class="tilt-card glass p-8 rounded-3xl glow-hover group cursor-default relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute inset-0 bg-amber-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500"></div>
+                <div class="relative z-10">
+                    <span class="inline-block px-3 py-1 mb-4 text-xs font-bold text-gray-400 bg-gray-500/10 rounded-full border border-gray-500/20">
+                        قريباً ⏳
+                    </span>
+                    <h3 class="text-2xl font-bold mb-4 text-amber-400">صراع الحضارات ⚔️</h3>
+                    <p class="text-gray-400">لعبة استراتيجية مبسطة للطلاب لفهم التحالفات والمعارك التاريخية الكبرى.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ⭐ قسم السلسلة التعليمية على الفيسبوك (المضاف حديثاً) ⭐ -->
+    <section class="max-w-7xl mx-auto px-6 py-10 relative z-10">
+        <div class="glass p-8 md:p-12 rounded-[2.5rem] relative overflow-hidden group border border-amber-500/30 shadow-[0_0_40px_rgba(245,158,11,0.15)] hover:shadow-[0_0_60px_rgba(245,158,11,0.3)] transition-all duration-500">
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-amber-500/10 to-blue-600/15 opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-right">
+                <div class="space-y-4">
+                    <span class="inline-block px-4 py-1.5 text-xs font-bold text-amber-400 bg-amber-500/10 rounded-full border border-amber-500/20">
+                        حلقات حصرية 📺
+                    </span>
+                    <h2 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600">
+                        تابع سلسلتي التعليمية على الفيسبوك
+                    </h2>
+                    <p class="text-gray-300 text-lg max-w-2xl leading-relaxed">
+                        لا تفوت أي حلقة جديدة! شروحات مبسطة، ومراجعات تفاعلية تضمن لك التفوق والمتعة في مادة الدراسات الاجتماعية.
+                    </p>
+                </div>
+                <div>
+                    <a href="https://www.facebook.com/share/p/1FZoQeVggw/" target="_blank" class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-black rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:shadow-[0_0_30px_rgba(37,99,235,0.7)] hover:-translate-y-1">
+                        <span>شاهد السلسلة الآن</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم خزانة المعرفة (المذكرات) -->
+    <section id="library" class="max-w-7xl mx-auto px-6 py-24 relative z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600 mb-4">خزانة المعرفة</h2>
+            <p class="text-gray-400 text-lg">مذكرات، خرائط ذهنية، وملخصات مجانية للطلاب.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass p-8 rounded-[2rem] flex items-center justify-between group hover:bg-white/5 transition-all">
+                <div class="flex items-center gap-6">
+                    <div class="text-5xl">📚</div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-2">مذكرة "الأسطورة" - تاريخ</h3>
+                        <p class="text-gray-400 text-sm">ملخص شامل للترم الأول (إعدادي)</p>
+                    </div>
+                </div>
+                <a href="history_note.pdf" download class="px-6 py-3 rounded-xl bg-white/10 hover:bg-amber-500 text-white font-bold transition-all group-hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] inline-block">تحميل</a>
+            </div>
+            <div class="glass p-8 rounded-[2rem] flex items-center justify-between group hover:bg-white/5 transition-all">
+                <div class="flex items-center gap-6">
+                    <div class="text-5xl">🗺️</div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-2">الخرائط الذهنية - جغرافيا</h3>
+                        <p class="text-gray-400 text-sm">تضاريس العالم في ورقة واحدة</p>
+                    </div>
+                </div>
+                <a href="geography_map.pptx" download class="px-6 py-3 rounded-xl bg-white/10 hover:bg-amber-500 text-white font-bold transition-all group-hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] inline-block">تحميل</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم عدسة التاريخ (معرض الصور) -->
+    <section id="gallery" class="max-w-7xl mx-auto px-6 py-24 relative z-10 bg-black/40 border-y border-white/5">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600 mb-4">عدسة التاريخ</h2>
+            <p class="text-gray-400 text-lg">لقطات من تفاعل الأبطال داخل الفصل الدراسي.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="tilt-card rounded-3xl overflow-hidden border border-white/10 group h-80 relative">
+                <div class="absolute inset-0 bg-black/50 group-hover:bg-transparent transition-all z-10"></div>
+                <img src="school1.jpg" onerror="fallbackImage(this, 'school1')" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+            </div>
+            <div class="tilt-card rounded-3xl overflow-hidden border border-white/10 group h-80 relative">
+                <div class="absolute inset-0 bg-black/50 group-hover:bg-transparent transition-all z-10"></div>
+                <img src="school2.jpg" onerror="fallbackImage(this, 'school2')" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم فيديو الريلز -->
+    <section id="reel" class="max-w-7xl mx-auto px-6 py-24 relative z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600 mb-4">في قلب الحصة</h2>
+            <p class="text-gray-400 text-lg">شاهد جزءاً من حماس وتفاعل الأبطال داخل الفصل.</p>
+        </div>
+        
+        <div class="flex justify-center">
+            <div class="tilt-card relative group p-2 rounded-[2.5rem] glass bg-gradient-to-b from-white/10 to-transparent w-full max-w-sm shadow-[0_0_40px_rgba(245,158,11,0.15)] hover:shadow-[0_0_60px_rgba(245,158,11,0.3)] transition-all duration-500 cursor-pointer">
+                <div class="absolute inset-0 bg-amber-500 rounded-[2.5rem] blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+                
+                <video controls="" preload="metadata" class="relative z-10 w-full aspect-[9/16] object-cover rounded-[2rem] border border-white/10 bg-black">
+                    <source src="reel.mp4" type="video/mp4">
+                    <source src="reel.mov" type="video/quicktime">
+                    <source src="reel.webm" type="video/webm">
+                    عفواً، متصفحك لا يدعم تشغيل هذا الفيديو.
+                </video>
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم شهادات الأبطال -->
+    <section id="testimonials" class="max-w-7xl mx-auto px-6 py-24 relative z-10 mb-20">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600 mb-4">شهادات الأبطال</h2>
+            <p class="text-gray-400 text-lg">ماذا يقول الطلاب عن تجربة التعلم؟</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass p-8 rounded-3xl relative">
+                <span class="text-6xl text-amber-500/20 absolute top-4 right-6">"</span>
+                <p class="text-gray-300 relative z-10 mb-6 font-semibold">مستر كريم خلى حصة الدراسات أحسن حصة في اليوم، الألعاب اللي بنلعبها بتثبت المعلومة ومش بننساها أبداً.</p>
+                <div class="flex items-center gap-4 border-t border-white/10 pt-4">
+                    <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center font-bold text-black">أ</div>
+                    <span class="text-amber-400 font-bold">أحمد محمود - الصف الثاني</span>
+                </div>
+            </div>
+            <div class="glass p-8 rounded-3xl relative">
+                <span class="text-6xl text-amber-500/20 absolute top-4 right-6">"</span>
+                <p class="text-gray-300 relative z-10 mb-6 font-semibold">أنا كنت بكره حفظ التاريخ، بس مع العروض وطريقة الحكاية بتاعة مستر كريم بقيت حاسس إني عايش جوه القصة.</p>
+                <div class="flex items-center gap-4 border-t border-white/10 pt-4">
+                    <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center font-bold text-black">م</div>
+                    <span class="text-amber-400 font-bold">محمد علي - الصف الأول</span>
+                </div>
+            </div>
+            <div class="glass p-8 rounded-3xl relative">
+                <span class="text-6xl text-amber-500/20 absolute top-4 right-6">"</span>
+                <p class="text-gray-300 relative z-10 mb-6 font-semibold">طريقة الشرح بتخلينا نفكر مش بس نحفظ، والمذكرات اللي بناخدها منظمة جداً وبتسهل علينا المراجعة.</p>
+                <div class="flex items-center gap-4 border-t border-white/10 pt-4">
+                    <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center font-bold text-black">ع</div>
+                    <span class="text-amber-400 font-bold">عمر طارق - الصف الثالث</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- زر واتساب العائم -->
+    <a href="https://wa.me/201127838761" target="_blank" class="fixed bottom-6 right-6 z-50 group flex items-center gap-3">
+        <div class="bg-[#25D366] text-white p-4 rounded-full shadow-[0_0_20px_rgba(37,211,102,0.4)] hover:shadow-[0_0_30px_rgba(37,211,102,0.7)] hover:scale-110 transition-all duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"></path>
+            </svg>
+        </div>
+        <span class="absolute right-16 bg-white text-black px-4 py-2 rounded-xl text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg pointer-events-none whitespace-nowrap">
+            تواصل معي لحجز حصة
+        </span>
+    </a>
+
+    <script>
+        document.querySelectorAll('.tilt-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const rotateX = (y - rect.height / 2) / -15;
+                const rotateY = (x - rect.width / 2) / 15;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            });
+        });
+
+        function fallbackImage(img, baseName) {
+            if (!img.dataset.triedPng) {
+                img.dataset.triedPng = "true";
+                img.src = baseName + ".png";
+            } else if (!img.dataset.triedJpeg) {
+                img.dataset.triedJpeg = "true";
+                img.src = baseName + ".jpeg";
+            } else if (!img.dataset.triedWebp) {
+                img.dataset.triedWebp = "true";
+                img.src = baseName + ".webp";
+            } else {
+                img.src = `https://placehold.co/400x300/222/f59e0b?text=صورة+${baseName}`;
+            }
+        }
+</script>
+
+<script>
+(() => {
+  const canvas = document.getElementById('earth');
+  if (!canvas) return;
+
+  // Real Earth texture + 3D globe. Labels are projected from real latitude/longitude
+  // instead of being manually positioned on the screen.
+  const THREE = window.THREE;
+  if (!THREE) {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js';
+    s.onload = () => init();
+    s.onerror = () => fallback();
+    document.head.appendChild(s);
+  } else init();
+
+  function fallback(){
+    canvas.style.background = 'radial-gradient(circle at 50% 42%, #183a57 0 16%, #08131f 38%, #020304 70%)';
+  }
+
+  function init(){
+    if (!window.THREE) return fallback();
+    const T = window.THREE;
+    const renderer = new T.WebGLRenderer({canvas, antialias:true, alpha:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.outputColorSpace = T.SRGBColorSpace;
+    renderer.toneMapping = T.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
+
+    const scene = new T.Scene();
+    scene.background = new T.Color(0x010204);
+
+    const camera = new T.PerspectiveCamera(34, innerWidth/innerHeight, 0.1, 100);
+    camera.position.set(0, 0.05, 3.65);
+
+    const globe = new T.Group();
+    scene.add(globe);
+
+    const loader = new T.TextureLoader();
+    loader.setCrossOrigin('anonymous');
+    const earthTex = loader.load(
+      'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+      tex => { tex.colorSpace = T.SRGBColorSpace; },
+      undefined,
+      () => fallback()
+    );
+    const normalTex = loader.load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg');
+    const specTex = loader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg');
+    const cloudTex = loader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
+
+    const geo = new T.SphereGeometry(1.18, 96, 96);
+    const earth = new T.Mesh(geo, new T.MeshPhongMaterial({
+      map: earthTex,
+      normalMap: normalTex,
+      normalScale: new T.Vector2(.55,.55),
+      specularMap: specTex,
+      specular: new T.Color(0x5f7280),
+      shininess: 22
+    }));
+    globe.add(earth);
+
+    const clouds = new T.Mesh(
+      new T.SphereGeometry(1.205, 96, 96),
+      new T.MeshPhongMaterial({map: cloudTex, transparent:true, opacity:.34, depthWrite:false})
+    );
+    globe.add(clouds);
+
+    // Atmospheric rim.
+    const atmosphere = new T.Mesh(
+      new T.SphereGeometry(1.255, 96, 96),
+      new T.MeshBasicMaterial({color:0x3aa7ff, transparent:true, opacity:.095, side:T.BackSide, blending:T.AdditiveBlending})
+    );
+    globe.add(atmosphere);
+
+    const starsGeo = new T.BufferGeometry();
+    const starCount = 1700;
+    const positions = new Float32Array(starCount*3);
+    for(let i=0;i<starCount;i++){
+      const r=7+Math.random()*9, a=Math.random()*Math.PI*2, z=Math.random()*2-1;
+      const q=Math.sqrt(1-z*z);
+      positions[i*3]=r*q*Math.cos(a); positions[i*3+1]=r*z; positions[i*3+2]=r*q*Math.sin(a);
+    }
+    starsGeo.setAttribute('position', new T.BufferAttribute(positions,3));
+    scene.add(new T.Points(starsGeo, new T.PointsMaterial({color:0xdfe9ff,size:.018,sizeAttenuation:true,transparent:true,opacity:.75})));
+
+    const key = new T.DirectionalLight(0xffffff, 2.4); key.position.set(-3.5,1.7,4.5); scene.add(key);
+    scene.add(new T.AmbientLight(0x17334d, .32));
+
+    // Orbit rings.
+    const ringMat = new T.LineBasicMaterial({color:0xe7a82f,transparent:true,opacity:.22});
+    [1.52,1.67].forEach((r,i)=>{
+      const pts=[]; for(let a=0;a<=Math.PI*2;a+=Math.PI/100) pts.push(new T.Vector3(Math.cos(a)*r, Math.sin(a)*r*.28, 0));
+      const ring = new T.Line(new T.BufferGeometry().setFromPoints(pts),ringMat.clone());
+      ring.rotation.x = i ? .92 : 1.08; ring.rotation.z = i ? -.2 : .35; scene.add(ring);
+    });
+
+    // The globe is oriented so Egypt (31.2E, 30.0N) faces the viewer.
+    const EGYPT = {lat:30.0, lon:31.2};
+    globe.rotation.y = -T.MathUtils.degToRad(EGYPT.lon);
+
+    const markers = [
+      {id:'eg', text:'🇪🇬 مصر • نقطة البداية', lat:30.0444, lon:31.2357, cls:'v9-eg'},
+      {id:'med', text:'البحر المتوسط', lat:35.0, lon:18.0, cls:'v9-med'},
+      {id:'af', text:'أفريقيا • الحضارات', lat:8.0, lon:22.0, cls:'v9-af'},
+      {id:'asia', text:'آسيا • الطرق والثقافات', lat:30.0, lon:75.0, cls:'v9-asia'},
+      {id:'europe', text:'أوروبا • التاريخ', lat:48.0, lon:15.0, cls:'v9-europe'}
+    ];
+    document.querySelectorAll('.v9-label').forEach(x=>x.remove());
+    const labelEls = markers.map(m=>{
+      const el=document.createElement('div'); el.className='v9-label '+m.cls; el.textContent=m.text; document.body.appendChild(el); return {m,el};
+    });
+
+    const markerGroup = new T.Group(); globe.add(markerGroup);
+    function latLon(lat,lon,r=1.205){
+      const la=T.MathUtils.degToRad(lat), lo=T.MathUtils.degToRad(lon);
+      return new T.Vector3(r*Math.cos(la)*Math.sin(lo), r*Math.sin(la), r*Math.cos(la)*Math.cos(lo));
+    }
+    markers.forEach((m,i)=>{
+      const p=latLon(m.lat,m.lon,1.225);
+      const dot=new T.Mesh(new T.SphereGeometry(i===0?.035:.022,20,20),new T.MeshBasicMaterial({color:i===0?0xffb52e:0x9ed7ff}));
+      dot.position.copy(p); markerGroup.add(dot);
+      const glow=new T.Mesh(new T.SphereGeometry(i===0?.085:.055,20,20),new T.MeshBasicMaterial({color:i===0?0xffa914:0x58c9ff,transparent:true,opacity:.12}));
+      glow.position.copy(p); markerGroup.add(glow);
+    });
+
+    let tx=0,ty=0,mx=0,my=0;
+    addEventListener('pointermove',e=>{tx=(e.clientX/innerWidth-.5)*.16; ty=(e.clientY/innerHeight-.5)*.09},{passive:true});
+    addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();},{passive:true});
+
+    const v=new T.Vector3(), q=new T.Vector3();
+    function projectLabel(m,el){
+      q.copy(latLon(m.lat,m.lon,1.32)); q.applyMatrix4(globe.matrixWorld); v.copy(q).project(camera);
+      const x=(v.x*.5+.5)*innerWidth, y=(-v.y*.5+.5)*innerHeight;
+      const visible=v.z<1 && q.clone().sub(camera.position).dot(q.clone().normalize())<0;
+      el.style.left=x+'px'; el.style.top=y+'px'; el.style.opacity=visible?'1':'0';
+    }
+
+    const clock=new T.Clock();
+    function animate(){
+      requestAnimationFrame(animate);
+      const t=clock.getElapsedTime();
+      mx+=(tx-mx)*.035; my+=(ty-my)*.035;
+      globe.rotation.x = my;
+      globe.rotation.y = -T.MathUtils.degToRad(EGYPT.lon) + mx + t*.012;
+      clouds.rotation.y += .00025;
+      markerGroup.rotation.y = 0;
+      labelEls.forEach(x=>projectLabel(x.m,x.el));
+      renderer.render(scene,camera);
+    }
+    animate();
+  }
+})();
+</script>
+
+</body>
+</html>

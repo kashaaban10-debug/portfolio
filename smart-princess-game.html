@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لعبة الأميرة الذكية - النسخة التفاعلية</title>
+    <!-- استدعاء مكتبة Tailwind CSS للتصميم -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- استدعاء خط Cairo العربي -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #fce7f3;
+            background-image: 
+                radial-gradient(#fbcfe8 2px, transparent 2px),
+                radial-gradient(#fbcfe8 2px, transparent 2px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            overflow-x: hidden;
+            touch-action: manipulation;
+            overscroll-behavior-y: none;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            border: 4px solid #fbcfe8;
+            box-shadow: 0 20px 40px rgba(244, 114, 182, 0.15), inset 0 0 0 2px #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f472b6, #e11d48);
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 20px rgba(225, 29, 72, 0.3);
+            border: 2px solid #fda4af;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 25px rgba(225, 29, 72, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(2px);
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #fce7f3;
+            color: #881337;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #fff1f2;
+            border-color: #f472b6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(244, 114, 182, 0.15);
+        }
+
+        .option-btn.correct {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border-color: #22c55e;
+            color: #14532d;
+            animation: pulse-green 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+
+        .option-btn.wrong {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-color: #ef4444;
+            color: #7f1d1d;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
+            50% { transform: scale(1.03); box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.015) translateY(-2px); }
+        }
+
+        @keyframes blink {
+            0%, 94%, 98%, 100% { transform: scaleY(1); }
+            96% { transform: scaleY(0.1); }
+        }
+
+        @keyframes pop-sparkle {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            100% { transform: scale(1.5) rotate(90deg); opacity: 0; }
+        }
+
+        .floating { animation: float 3s ease-in-out infinite; }
+        
+        .wardrobe-container {
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: inset 0 4px 15px rgba(0,0,0,0.03);
+            border: 2px solid #f3f4f6;
+        }
+
+        .item-card {
+            background: #fff;
+            border: 2px solid #f1f5f9;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0));
+            z-index: 1;
+        }
+
+        .item-card:hover {
+            border-color: #f472b6;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(244, 114, 182, 0.15);
+        }
+        
+        .item-card.selected {
+            border-color: #db2777;
+            background: #fdf2f8;
+            box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.2);
+            transform: scale(0.98);
+        }
+
+        /* SVG Icon for item cards */
+        .item-icon-svg {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
+        }
+
+        .tab-btn {
+            position: relative;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 3px;
+            background: #db2777;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+        
+        .tab-btn.active {
+            color: #db2777;
+        }
+        
+        .tab-btn.active::after {
+            width: 80%;
+        }
+
+        .doll-svg {
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));
+            transition: transform 0.3s ease;
+        }
+
+        .breathe-anim {
+            animation: breathe 4s ease-in-out infinite;
+            transform-origin: 150px 250px;
+        }
+
+        .eyes-anim {
+            animation: blink 5s infinite;
+            transform-origin: 150px 110px;
+        }
+        
+        .sparkle-group {
+            pointer-events: none;
+            opacity: 0;
+        }
+        .sparkle-group.active {
+            animation: pop-sparkle 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        .hidden-screen { display: none !important; }
+        
+        /* إخفاء شريط التمرير */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f472b6; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-8 relative">
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <main id="start-screen" class="glass-panel w-full max-w-xl p-10 text-center flex flex-col items-center z-10 relative">
+        <div class="relative mb-6 floating">
+            <div class="text-8xl">👑</div>
+            <div class="absolute -bottom-4 -right-4 text-4xl floating" style="animation-delay: 0.5s">✨</div>
+            <div class="absolute top-0 -left-4 text-3xl floating" style="animation-delay: 1s">⭐</div>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-rose-500 mb-4 drop-shadow-sm">
+            الأميرة الذكية
+        </h1>
+        <p class="text-xl text-gray-700 mb-10 font-semibold leading-relaxed">
+            أهلاً بكِ يا بطلة! 💖<br> 
+            أجيبي بذكاء على أسئلة الدراسات لتفتحي غرفة الملابس السحرية.
+        </p>
+        <button onclick="startGame()" class="btn-primary text-2xl font-bold py-4 px-12 rounded-full w-full max-w-sm shadow-xl">
+            ابدئي المغامرة! 🚀
+        </button>
+    </main>
+
+    <main id="quiz-screen" class="glass-panel w-full max-w-3xl p-6 md:p-10 hidden-screen flex-col z-10 relative">
+        <div class="flex flex-wrap justify-between items-center mb-8 gap-4">
+            <div class="bg-gradient-to-r from-pink-100 to-rose-50 px-6 py-2 rounded-full border-2 border-pink-200 shadow-sm">
+                <span id="question-counter" class="text-pink-700 font-black text-xl">السؤال 1 / 10</span>
+            </div>
+            <div class="flex text-3xl bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100" id="score-stars">
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 shadow-sm border-2 border-pink-50 mb-8 text-center min-h-[140px] flex items-center justify-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-2 h-full bg-pink-400"></div>
+            <h2 id="question-text" class="text-2xl md:text-3xl font-bold text-gray-800 leading-normal z-10">
+            </h2>
+        </div>
+
+        <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        </div>
+
+        <div id="feedback-msg" class="mt-8 text-center text-2xl font-black h-10 opacity-0 transition-all duration-300 transform translate-y-4"></div>
+    </main>
+
+    <main id="reward-screen" class="glass-panel w-full max-w-6xl h-[95vh] flex flex-col p-3 md:p-8 hidden-screen z-10 relative">
+        <div class="text-center mb-3 md:mb-6 shrink-0">
+            <h1 class="text-2xl md:text-4xl font-black text-pink-600 mb-1">🎀 غرفة ملابس الأميرة 🎀</h1>
+            <p class="text-gray-500 font-bold text-sm md:text-lg">صممي إطلالة أميرتك بأحدث صيحات الموضة!</p>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-3 md:gap-8 items-stretch flex-1 min-h-0">
+            
+            <!-- منطقة العروسة (Advanced SVG) -->
+            <div class="w-full h-[45%] lg:h-full lg:w-5/12 flex justify-center items-center bg-gradient-to-b from-pink-50 to-white p-2 rounded-[30px] border-4 border-white shadow-lg relative overflow-hidden shrink-0">
+                <!-- خلفية زخرفية -->
+                <div class="absolute top-10 left-10 w-20 h-20 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-50"></div>
+                <div class="absolute bottom-10 right-10 w-32 h-32 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-50"></div>
+
+                <svg viewBox="0 0 300 500" class="doll-svg" id="doll-svg">
+                    <defs>
+                        <!-- تدرجات لونية واقعية للبشرة -->
+                        <linearGradient id="skin" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#f5d0c5" />
+                            <stop offset="50%" stop-color="#ffe4db" />
+                            <stop offset="100%" stop-color="#f5d0c5" />
+                        </linearGradient>
+                        <!-- ظل البشرة الداخلي (الرقبة والمفاصل) -->
+                        <linearGradient id="skin-shadow" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#e3a78d" />
+                            <stop offset="100%" stop-color="#f5d0c5" />
+                        </linearGradient>
+                        <radialGradient id="blush" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#ff8da1" stop-opacity="0.7"/>
+                            <stop offset="100%" stop-color="#ff8da1" stop-opacity="0"/>
+                        </radialGradient>
+                        
+                        <!-- خامات القماش (Textures) -->
+                        <pattern id="denim" width="4" height="4" patternUnits="userSpaceOnUse">
+                            <rect width="4" height="4" fill="#3b5998"/>
+                            <path d="M0,0 L4,4 M4,0 L0,4" stroke="#ffffff" stroke-width="0.5" opacity="0.25"/>
+                        </pattern>
+                        <pattern id="knit" width="8" height="8" patternUnits="userSpaceOnUse">
+                            <rect width="8" height="8" fill="#e2e8f0"/>
+                            <path d="M0,4 Q2,0 4,4 T8,4" stroke="#94a3b8" fill="none" stroke-width="1.5" opacity="0.6"/>
+                        </pattern>
+                        <linearGradient id="silk" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#f472b6" />
+                            <stop offset="50%" stop-color="#fdf2f8" />
+                            <stop offset="100%" stop-color="#be185d" />
+                        </linearGradient>
+                        <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fbbf24"/>
+                            <stop offset="50%" stop-color="#fffbeb"/>
+                            <stop offset="100%" stop-color="#d97706"/>
+                        </linearGradient>
+
+                        <!-- فلتر للظلال الواقعية -->
+                        <filter id="drop-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.2"/>
+                        </filter>
+                        <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000000" flood-opacity="0.1"/>
+                        </filter>
+                    </defs>
+
+                    <!-- التأثير السحري -->
+                    <g id="magic-sparkles" class="sparkle-group" transform="translate(150, 250)">
+                        <path d="M0 -40 L5 -10 L35 -5 L5 0 L0 30 L-5 0 L-35 -5 L-5 -10 Z" fill="#FFD700"/>
+                        <path d="M40 -60 L43 -45 L58 -42 L43 -39 L40 -24 L37 -39 L22 -42 L37 -45 Z" fill="#FF69B4"/>
+                        <path d="M-40 -20 L-38 -10 L-28 -8 L-38 -6 L-40 4 L-42 -6 L-52 -8 L-42 -10 Z" fill="#00BFFF"/>
+                    </g>
+
+                    <!-- Layer 1: الشعر الخلفي -->
+                    <g id="doll-hair-back"></g>
+
+                    <!-- Layer 2: جسم العروسة (يتنفس) -->
+                    <g class="breathe-anim">
+                        <!-- الذراعين (خلفية) بتفاصيل تشريحية بسيطة -->
+                        <path d="M 105 195 Q 70 240 75 320 Q 78 335 85 330 Q 90 270 110 210" fill="url(#skin)"/>
+                        <path d="M 195 195 Q 230 240 225 320 Q 222 335 215 330 Q 210 270 190 210" fill="url(#skin)"/>
+
+                        <!-- الساقين مع تفاصيل الركبة -->
+                        <path d="M 125 290 L 120 440 A 15 15 0 0 0 145 440 L 145 290 Z" fill="url(#skin)"/>
+                        <path d="M 175 290 L 180 440 A 15 15 0 0 1 155 440 L 155 290 Z" fill="url(#skin)"/>
+                        <!-- خطوط الركبة -->
+                        <path d="M 125 365 Q 132 370 140 365" stroke="#e3a78d" stroke-width="1.5" fill="none" opacity="0.6"/>
+                        <path d="M 160 365 Q 167 370 175 365" stroke="#e3a78d" stroke-width="1.5" fill="none" opacity="0.6"/>
+
+                        <!-- الجذع (Torso) -->
+                        <path d="M 120 180 Q 150 195 180 180 L 175 300 Q 150 310 125 300 Z" fill="url(#skin)"/>
+                        <!-- عظام الترقوة -->
+                        <path d="M 125 185 Q 140 195 145 190 M 175 185 Q 160 195 155 190" stroke="#e3a78d" stroke-width="1.5" fill="none" opacity="0.6"/>
+                        
+                        <!-- الرقبة بظل واقعي -->
+                        <path d="M 135 150 L 165 150 L 160 190 L 140 190 Z" fill="url(#skin-shadow)"/>
+
+                        <!-- الرأس والوجه بتفاصيل عالية -->
+                        <g id="head-group">
+                            <ellipse cx="150" cy="115" rx="55" ry="65" fill="url(#skin)" filter="url(#drop-shadow)"/>
+                            <!-- الخدود -->
+                            <circle cx="115" cy="135" r="12" fill="url(#blush)"/>
+                            <circle cx="185" cy="135" r="12" fill="url(#blush)"/>
+                            <!-- الفم بلمعة خفيفة -->
+                            <path d="M 138 150 Q 150 162 162 150" stroke="#d9777f" stroke-width="3" stroke-linecap="round" fill="transparent"/>
+                            <path d="M 142 152 Q 150 158 158 152" stroke="#ffb3ba" stroke-width="1" fill="transparent"/>
+                            <!-- الأنف -->
+                            <path d="M 148 135 Q 150 140 152 135" stroke="#e3a78d" stroke-width="2.5" stroke-linecap="round" fill="transparent"/>
+
+                            <!-- العينين (ترمش) -->
+                            <g class="eyes-anim">
+                                <!-- بياض العين -->
+                                <path d="M 105 115 Q 115 105 125 115 Q 115 120 105 115" fill="#ffffff"/>
+                                <path d="M 175 115 Q 185 105 195 115 Q 185 120 175 115" fill="#ffffff"/>
+                                <!-- القزحية (عسلي) -->
+                                <circle cx="115" cy="113" r="5" fill="#8B4513"/>
+                                <circle cx="185" cy="113" r="5" fill="#8B4513"/>
+                                <!-- الحدقة ولمعة العين -->
+                                <circle cx="115" cy="113" r="3" fill="#000"/>
+                                <circle cx="185" cy="113" r="3" fill="#000"/>
+                                <circle cx="113" cy="111" r="1.5" fill="#fff"/>
+                                <circle cx="183" cy="111" r="1.5" fill="#fff"/>
+                                <!-- الرموش العلوية والحواجب -->
+                                <path d="M 103 115 Q 115 102 127 115" stroke="#33251e" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                <path d="M 173 115 Q 185 102 197 115" stroke="#33251e" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                <path d="M 100 100 Q 115 90 130 98" stroke="#5D4037" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                <path d="M 200 100 Q 185 90 170 98" stroke="#5D4037" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            </g>
+                        </g>
+
+                        <!-- Layer 3: الملابس السفلية (بنطلون/جيبة) -->
+                        <g id="doll-bottom" filter="url(#drop-shadow)"></g>
+
+                        <!-- Layer 4: الملابس العلوية (تيشرت/جاكيت) -->
+                        <g id="doll-top" filter="url(#drop-shadow)"></g>
+
+                        <!-- Layer 5: الشعر الأمامي (الغرة) -->
+                        <g id="doll-hair-front" filter="url(#soft-shadow)"></g>
+
+                        <!-- Layer 6: الإكسسوارات (عقد، نظارة، الخ) -->
+                        <g id="doll-accessory" filter="url(#drop-shadow)"></g>
+                    </g>
+                    
+                    <!-- Layer 7: الأحذية (خارج التنفس لتظل ثابتة على الأرض) -->
+                    <g id="doll-shoes" filter="url(#drop-shadow)"></g>
+                </svg>
+            </div>
+
+            <div class="w-full h-[55%] lg:h-full lg:w-7/12 wardrobe-container p-4 md:p-6 flex flex-col min-h-0">
+                <div class="flex justify-between md:justify-start mb-4 md:mb-6 border-b-2 border-gray-100 pb-2 overflow-x-auto gap-3 md:gap-6 hide-scrollbar shrink-0">
+                    <button onclick="changeTab('hair')" class="tab-btn active text-sm md:text-lg font-bold text-gray-400 pb-2 px-1 whitespace-nowrap" id="tab-hair">👱‍♀️ الشعر</button>
+                    <button onclick="changeTab('top')" class="tab-btn text-sm md:text-lg font-bold text-gray-400 pb-2 px-1 whitespace-nowrap" id="tab-top">👕 علوي</button>
+                    <button onclick="changeTab('bottom')" class="tab-btn text-sm md:text-lg font-bold text-gray-400 pb-2 px-1 whitespace-nowrap" id="tab-bottom">👖 سفلي</button>
+                    <button onclick="changeTab('shoes')" class="tab-btn text-sm md:text-lg font-bold text-gray-400 pb-2 px-1 whitespace-nowrap" id="tab-shoes">👟 حذاء</button>
+                    <button onclick="changeTab('accessory')" class="tab-btn text-sm md:text-lg font-bold text-gray-400 pb-2 px-1 whitespace-nowrap" id="tab-accessory">💍 إكسسوار</button>
+                </div>
+
+                <div id="items-container" class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-3 overflow-y-auto pr-2 pb-4 flex-1 content-start">
+                    <!-- Dynamic Items -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4 md:mt-6 shrink-0 text-center flex flex-col md:flex-row justify-center gap-4">
+            <button onclick="takeScreenshot()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-8 rounded-full transition-transform hover:scale-105 shadow-lg text-lg flex items-center justify-center gap-2">
+                📸 حفظ الإطلالة
+            </button>
+            <button onclick="location.reload()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-full transition-transform hover:scale-105 shadow-lg text-lg flex items-center justify-center gap-2">
+                🔄 العب مرة أخرى!
+            </button>
+        </div>
+    </main>
+
+    <script>
+        // --- نظام الصوت ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+        
+        function playTone(freq, type, duration, vol=0.1, slideFreq=null) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                if (slideFreq) osc.frequency.exponentialRampToValueAtTime(slideFreq, audioCtx.currentTime + duration);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playPop() { playTone(600, 'sine', 0.1, 0.1); }
+        function playCorrect() { 
+            playTone(440, 'sine', 0.1, 0.15); 
+            setTimeout(()=>playTone(554, 'sine', 0.1, 0.15), 100);
+            setTimeout(()=>playTone(659, 'sine', 0.1, 0.15), 200);
+            setTimeout(()=>playTone(880, 'sine', 0.2, 0.15), 300);
+        }
+        function playWrong() { playTone(300, 'triangle', 0.3, 0.15, 150); }
+        function playMagic() {
+            let delay = 0;
+            [880, 1108, 1318, 1760, 2217].forEach(f => {
+                setTimeout(()=>playTone(f, 'sine', 0.15, 0.1), delay);
+                delay += 60;
+            });
+        }
+
+        // --- نظام التصوير ---
+        function takeScreenshot() {
+            playPop();
+            const svg = document.getElementById('doll-svg');
+            const serializer = new XMLSerializer();
+            let svgStr = serializer.serializeToString(svg);
+            
+            if (!svgStr.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                svgStr = svgStr.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+            
+            const svgBlob = new Blob([svgStr], {type: "image/svg+xml;charset=utf-8"});
+            const url = URL.createObjectURL(svgBlob);
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1200; 
+                canvas.height = 2000;
+                const ctx = canvas.getContext('2d');
+                
+                const grad = ctx.createLinearGradient(0, 0, 0, 2000);
+                grad.addColorStop(0, '#fdf2f8');
+                grad.addColorStop(1, '#fbcfe8');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = "#fef08a";
+                ctx.beginPath(); ctx.arc(1000, 1600, 400, 0, 2*Math.PI); ctx.fill();
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath(); ctx.arc(200, 300, 300, 0, 2*Math.PI); ctx.fill();
+
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = "#db2777";
+                ctx.font = "bold 80px Cairo, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("✨ إطلالة أميرتي الذكية ✨", 600, 150);
+
+                URL.revokeObjectURL(url);
+                const imgURI = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = 'أميرتي_الذكية.png';
+                link.href = imgURI;
+                link.click();
+            };
+            img.src = url;
+        }
+
+        // --- بنك الأسئلة المخصص للدرسين ---
+        const allQuestions = [
+            { q: "رسم توضيحي لسطح الأرض أو جزء منه باستخدام مجموعة من الرموز والألوان هو:", opts: ["الخريطة", "الصورة", "المكتبة", "المدرسة"], ans: 0 },
+            { q: "من أهم أدوات تحديد المواقع التي يستخدمها الإنسان:", opts: ["التلفزيون", "الخريطة", "الساعة", "الميزان"], ans: 1 },
+            { q: "يوضح مدلول (معنى) الرموز والألوان الموجودة على الخريطة:", opts: ["عنوان الخريطة", "مفتاح الخريطة", "البوصلة", "مقياس الرسم"], ans: 1 },
+            { q: "يشير إلى المعلومات والموضوع الذي تتناوله الخريطة:", opts: ["مفتاح الخريطة", "البوصلة", "عنوان الخريطة", "مقياس الرسم"], ans: 2 },
+            { q: "تستخدم في تحديد الاتجاهات الأصلية والفرعية على الخريطة:", opts: ["مفتاح الخريطة", "البوصلة", "مقياس الرسم", "العنوان"], ans: 1 },
+            { q: "النسبة بين المسافة على الخريطة وما يقابلها على الطبيعة:", opts: ["مقياس الرسم", "وردة البوصلة", "عنوان الخريطة", "مفتاح الخريطة"], ans: 0 },
+            { q: "الاتجاه الأصلي الذي يقابل اتجاه الشمال هو:", opts: ["الشرق", "الجنوب", "الغرب", "الشمال الشرقي"], ans: 1 },
+            { q: "الاتجاه الأصلي الذي يقابل اتجاه الشرق هو:", opts: ["الشمال", "الجنوب", "الغرب", "الشمال الغربي"], ans: 2 },
+            { q: "من الاتجاهات الفرعية:", opts: ["الشمال", "الشرق", "الشمال الشرقي", "الجنوب"], ans: 2 },
+            { q: "يستخدم الفلاح الخريطة في:", opts: ["المذاكرة", "تحديد الأماكن السياحية", "تحديد ملكية الأرض الزراعية", "تحديد المواقع الحربية"], ans: 2 },
+            { q: "علم مصر يتخذ شكل:", opts: ["مربع", "مثلث", "مستطيل", "دائرة"], ans: 2 },
+            { q: "اللون الذي يدل على دماء الشهداء من أجل الحرية في علم مصر:", opts: ["الأسود", "الأبيض", "الأحمر", "الأخضر"], ans: 2 },
+            { q: "اللون الذي يدل على السلام في علم مصر:", opts: ["الأحمر", "الأسود", "الأبيض", "الأصفر"], ans: 2 },
+            { q: "اللون الذي يعبر عن فترات الظلم والاستعمار في علم مصر:", opts: ["الأسود", "الأحمر", "الأبيض", "الأزرق"], ans: 0 },
+            { q: "يوجد في وسط علم مصر (في الجزء الأبيض):", opts: ["هرم", "نسر", "صقر", "نجمة"], ans: 1 },
+            { q: "يرمز النسر في علم مصر إلى:", opts: ["الضعف", "القوة", "السلام", "الظلم"], ans: 1 },
+            { q: "يُرفع علم مصر على:", opts: ["المنازل المهجورة", "الوزارات والمؤسسات الحكومية", "تحت الأرض", "في البحر فقط"], ans: 1 },
+            { q: "من السلوكيات التي تعبر عن احترام علم مصر:", opts: ["الكتابة عليه", "تمزيقه", "الوقوف باحترام أثناء تحيته", "جعله يلامس الأرض"], ans: 2 }
+        ];
+
+        let currentQuestions = [];
+        let currentQIndex = 0;
+        let score = 0;
+
+        function shuffle(arr) {
+            let array = [...arr];
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            initAudio();
+            playPop();
+            currentQuestions = shuffle(allQuestions).slice(0, 10);
+            currentQIndex = 0;
+            score = 0;
+            document.getElementById('start-screen').classList.add('hidden-screen');
+            const quizScreen = document.getElementById('quiz-screen');
+            quizScreen.classList.remove('hidden-screen');
+            quizScreen.classList.add('flex');
+            updateScoreUI();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const qData = currentQuestions[currentQIndex];
+            document.getElementById('question-counter').innerText = `السؤال ${currentQIndex + 1} من 10`;
+            document.getElementById('question-text').innerText = qData.q;
+            
+            const msg = document.getElementById('feedback-msg');
+            msg.style.opacity = '0';
+            msg.style.transform = 'translateY(10px)';
+
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+            
+            qData.opts.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn text-xl font-bold py-4 px-4 rounded-2xl shadow-sm w-full min-h-[70px]';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btn) {
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(b => b.disabled = true);
+            
+            const correctIndex = currentQuestions[currentQIndex].ans;
+            const msg = document.getElementById('feedback-msg');
+            
+            if(selectedIndex === correctIndex) {
+                playCorrect();
+                btn.classList.add('correct');
+                msg.innerHTML = "✨ رائعة يا أميرة! ✨";
+                msg.className = "mt-8 text-center text-2xl font-black h-10 text-green-600 transition-all duration-300 transform translate-y-0";
+                score++;
+                updateScoreUI();
+                setTimeout(() => nextQuestion(), 1000);
+            } else {
+                playWrong();
+                btn.classList.add('wrong');
+                btns[correctIndex].classList.add('correct');
+                msg.innerHTML = "❌ ركزي في السؤال القادم!";
+                msg.className = "mt-8 text-center text-2xl font-black h-10 text-red-500 transition-all duration-300 transform translate-y-0";
+                setTimeout(() => nextQuestion(), 1800);
+            }
+            msg.style.opacity = '1';
+        }
+
+        function updateScoreUI() {
+            document.getElementById('score-stars').innerHTML = '⭐'.repeat(score);
+        }
+
+        function nextQuestion() {
+            currentQIndex++;
+            if(currentQIndex < currentQuestions.length) loadQuestion();
+            else endQuiz();
+        }
+
+        function endQuiz() {
+            playMagic();
+            document.getElementById('quiz-screen').classList.remove('flex');
+            document.getElementById('quiz-screen').classList.add('hidden-screen');
+            document.getElementById('reward-screen').classList.remove('hidden-screen');
+            startConfetti();
+            renderWardrobe();
+            applyDefaultLook();
+        }
+
+        const wardrobe = {
+            hair: [
+                { id: 'h1', name: 'بني مموج', color: '#5D4037',
+                  back: `<path d="M 100 120 C 70 180, 70 280, 95 310 C 120 280, 100 160, 150 150 C 200 160, 180 280, 205 310 C 230 280, 230 180, 200 120 Z" fill="#4E342E"/>`,
+                  front: `<path d="M 150 45 C 80 45, 75 125, 85 165 C 95 125, 120 70, 150 70 C 180 70, 205 125, 215 165 C 225 125, 220 45, 150 45 Z" fill="#5D4037"/><path d="M 150 50 C 120 50, 95 85, 95 115" stroke="#795548" stroke-width="4" fill="none" opacity="0.5"/>`,
+                  icon: `<circle cx="25" cy="25" r="20" fill="#5D4037"/>` },
+                { id: 'h2', name: 'أشقر كيرلي', color: '#FBC02D',
+                  back: `<path d="M 80 100 Q 40 200 70 320 Q 100 270 120 230 L 180 230 Q 200 270 230 320 Q 260 200 220 100 Z" fill="#F9A825"/>
+                         <circle cx="70" cy="280" r="15" fill="#FBC02D"/><circle cx="230" cy="280" r="15" fill="#FBC02D"/>`,
+                  front: `<path d="M 150 40 C 70 40, 60 130, 80 180 C 95 135, 120 60, 150 60 C 180 60, 205 135, 220 180 C 240 130, 230 40, 150 40 Z" fill="#FBC02D"/>`,
+                  icon: `<circle cx="25" cy="25" r="20" fill="#FBC02D"/>` },
+                { id: 'h3', name: 'أسود أنيق', color: '#212121',
+                  back: `<path d="M 150 40 L 90 100 L 90 280 C 110 290 120 250 150 250 C 180 250 190 290 210 280 L 210 100 Z" fill="#000000"/>`,
+                  front: `<path d="M 150 45 C 95 45, 85 110, 95 150 C 110 100, 130 65, 150 65 C 170 65, 190 100, 205 150 C 215 110, 205 45, 150 45 Z" fill="#212121"/><path d="M 130 55 C 140 50, 160 50, 170 55" stroke="#424242" stroke-width="3" fill="none"/>`,
+                  icon: `<circle cx="25" cy="25" r="20" fill="#212121"/>` },
+                { id: 'h4', name: 'ديل حصان أحمر', color: '#D84315',
+                  back: `<path d="M 170 80 C 260 30, 290 220, 190 260 C 230 180, 220 100, 170 80 Z" fill="#BF360C"/>`,
+                  front: `<path d="M 150 50 C 90 50, 85 110, 90 150 Q 120 80 150 90 Q 180 80 210 150 C 215 110, 210 50, 150 50 Z" fill="#D84315"/>`,
+                  icon: `<circle cx="25" cy="25" r="20" fill="#D84315"/>` }
+            ],
+            top: [
+                { id: 't1', name: 'جاكيت جلد وردي', color: '#EC407A',
+                  svg: `<path d="M 120 180 Q 150 195 180 180 L 195 210 Q 190 240 175 270 L 125 270 Q 110 240 105 210 Z" fill="#F48FB1"/>
+                        <path d="M 140 188 L 140 270 M 160 188 L 160 270" stroke="#D81B60" stroke-width="2"/>
+                        <path d="M 105 210 L 125 215 L 125 270 L 175 270 L 175 215 L 195 210 L 180 180 Q 150 195 120 180 Z" fill="none" stroke="#D81B60" stroke-width="3"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#EC407A"/>` },
+                { id: 't2', name: 'توب حرير لامع', color: '#f472b6',
+                  svg: `<path d="M 125 185 Q 150 210 175 185 L 172 260 Q 150 265 128 260 Z" fill="url(#silk)"/>
+                        <!-- ثنيات القماش -->
+                        <path d="M 140 200 Q 145 230 135 260 M 160 200 Q 155 230 165 260" stroke="#be185d" stroke-width="1" fill="none" opacity="0.4"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="url(#silk)"/>` },
+                { id: 't3', name: 'سويتر صوف تريكو', color: '#e2e8f0',
+                  svg: `<path d="M 115 180 Q 150 190 185 180 L 195 250 L 175 255 L 175 290 Q 150 295 125 290 L 125 255 L 105 250 Z" fill="url(#knit)"/>
+                        <path d="M 125 280 Q 150 285 175 280 L 175 290 Q 150 295 125 290 Z" fill="#cbd5e1"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#cbd5e1"/>` },
+                { id: 't4', name: 'قميص جينز فاتح', color: '#81d4fa',
+                  svg: `<path d="M 115 180 L 140 200 L 150 190 L 160 200 L 185 180 L 190 240 L 175 235 L 175 285 L 125 285 L 125 235 L 110 240 Z" fill="#b3e5fc"/>
+                        <line x1="150" y1="190" x2="150" y2="285" stroke="#0288d1" stroke-width="1.5"/>
+                        <circle cx="150" cy="210" r="2" fill="#fff"/><circle cx="150" cy="240" r="2" fill="#fff"/><circle cx="150" cy="270" r="2" fill="#fff"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#81d4fa"/>` }
+            ],
+            bottom: [
+                { id: 'b1', name: 'بنطلون جينز أزرق', color: '#3949AB',
+                  svg: `<path d="M 123 270 L 177 270 L 182 425 L 155 425 L 150 320 L 145 425 L 118 425 Z" fill="url(#denim)"/>
+                        <!-- تفاصيل الجينز -->
+                        <path d="M 125 285 L 140 285 L 135 305 Z M 175 285 L 160 285 L 165 305 Z" fill="#1e3a8a" opacity="0.6"/>
+                        <line x1="150" y1="270" x2="150" y2="320" stroke="#facc15" stroke-width="1.5" stroke-dasharray="2,2"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#3949AB"/>` },
+                { id: 'b2', name: 'جيبة منفوشة سهرة', color: '#F06292',
+                  svg: `<path d="M 120 270 L 180 270 Q 240 350 200 400 Q 150 415 100 400 Q 60 350 120 270 Z" fill="#F06292"/>
+                        <path d="M 120 270 Q 140 350 110 405 M 150 270 L 150 410 M 180 270 Q 160 350 190 405" stroke="#d81b60" stroke-width="3" fill="none" opacity="0.5"/>
+                        <path d="M 120 270 L 180 270 L 175 285 L 125 285 Z" fill="#c2185b"/>`, // حزام
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#F06292"/>` },
+                { id: 'b3', name: 'شورت أنيق بني', color: '#8D6E63',
+                  svg: `<path d="M 123 270 L 177 270 L 180 340 L 155 330 L 150 310 L 145 330 L 120 340 Z" fill="#8D6E63"/>
+                        <path d="M 123 270 L 177 270 L 175 280 L 125 280 Z" fill="#5D4037"/>
+                        <circle cx="150" cy="275" r="3" fill="#D7CCC8"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#8D6E63"/>` },
+                { id: 'b4', name: 'جيبة بليسيه صفراء', color: '#FBC02D',
+                  svg: `<path d="M 123 270 L 177 270 L 195 380 Q 150 390 105 380 Z" fill="#FFF176"/>
+                        <path d="M 130 270 L 120 380 M 140 270 L 135 385 M 150 270 L 150 388 M 160 270 L 165 385 M 170 270 L 180 380" stroke="#F57C00" stroke-width="2.5" fill="none" opacity="0.6"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#FBC02D"/>` }
+            ],
+            shoes: [
+                { id: 's1', name: 'كوتشي أبيض وأسود', color: '#F5F5F5',
+                  svg: `<path d="M 118 430 L 145 430 L 148 450 Q 130 455 112 450 Q 110 440 118 430 Z M 155 430 L 182 430 L 188 450 Q 170 455 152 450 Q 170 440 155 430 Z" fill="#FFFFFF"/>
+                        <path d="M 112 445 L 148 445 M 152 445 L 188 445" stroke="#212121" stroke-width="3"/>
+                        <path d="M 125 430 L 135 440 M 125 435 L 135 445 M 175 430 L 165 440 M 175 435 L 165 445" stroke="#9e9e9e" stroke-width="1.5"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#FFFFFF"/>` },
+                { id: 's2', name: 'بوت شتوي بني', color: '#795548',
+                  svg: `<path d="M 118 410 L 145 410 L 148 450 L 112 450 Z M 155 410 L 182 410 L 188 450 L 152 450 Z" fill="#5D4037"/>
+                        <path d="M 118 410 L 145 410 L 146 420 L 117 420 Z M 155 410 L 182 410 L 183 420 L 154 420 Z" fill="#3E2723"/>
+                        <line x1="112" y1="445" x2="148" y2="445" stroke="#3E2723" stroke-width="4"/><line x1="152" y1="445" x2="188" y2="445" stroke="#3E2723" stroke-width="4"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#795548"/>` },
+                { id: 's3', name: 'حذاء كعب أحمر', color: '#E53935',
+                  svg: `<path d="M 120 435 Q 135 435 145 438 L 145 450 L 115 450 Q 110 445 120 435 Z M 180 435 Q 165 435 155 438 L 155 450 L 185 450 Q 190 445 180 435 Z" fill="#C62828"/>
+                        <path d="M 142 438 L 142 450 M 158 438 L 158 450" stroke="#000" stroke-width="2"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#E53935"/>` },
+                { id: 's4', name: 'صندل صيفي', color: '#26A69A',
+                  svg: `<path d="M 115 445 L 148 445 L 145 450 L 112 450 Z M 152 445 L 185 445 L 188 450 L 155 450 Z" fill="#00695C"/>
+                        <path d="M 120 435 L 140 445 M 180 435 L 160 445 M 125 440 L 135 445 M 175 440 L 165 445" stroke="#00897B" stroke-width="2.5"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#26A69A"/>` }
+            ],
+            accessory: [
+                { id: 'a0', name: 'بدون إكسسوار', color: '#f1f5f9',
+                  svg: ``,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#f1f5f9"/>` },
+                { id: 'a1', name: 'نظارة شمسية', color: '#1f2937',
+                  svg: `<path d="M 115 110 Q 125 105 135 110 Q 135 125 125 125 Q 115 125 115 110 Z M 165 110 Q 175 105 185 110 Q 185 125 175 125 Q 165 125 165 110 Z" fill="#1e3a8a" opacity="0.8"/>
+                        <path d="M 115 110 Q 125 105 135 110 Q 135 125 125 125 Q 115 125 115 110 Z M 165 110 Q 175 105 185 110 Q 185 125 175 125 Q 165 125 165 110 Z" stroke="#111827" stroke-width="2" fill="none"/>
+                        <path d="M 135 115 Q 150 110 165 115" stroke="#111827" stroke-width="2" fill="none"/>
+                        <path d="M 105 110 L 115 115 M 195 110 L 185 115" stroke="#111827" stroke-width="2" fill="none"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#1f2937"/>` },
+                { id: 'a2', name: 'عقد ذهبي بقلادة', color: '#fbbf24',
+                  svg: `<path d="M 135 175 Q 150 195 165 175" stroke="url(#gold)" stroke-width="2" fill="none"/>
+                        <path d="M 150 185 L 147 190 L 150 195 L 153 190 Z" fill="#0ea5e9"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#fbbf24"/>` },
+                { id: 'a3', name: 'طوق ورد ربيعي', color: '#f472b6',
+                  svg: `<path d="M 100 80 Q 150 60 200 80" stroke="#22c55e" stroke-width="3" fill="none"/>
+                        <circle cx="110" cy="75" r="6" fill="#f472b6"/><circle cx="130" cy="68" r="6" fill="#a78bfa"/>
+                        <circle cx="150" cy="65" r="7" fill="#fbbf24"/><circle cx="170" cy="68" r="6" fill="#f472b6"/>
+                        <circle cx="190" cy="75" r="6" fill="#60a5fa"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#f472b6"/>` },
+                { id: 'a4', name: 'تاج ذهبي', color: '#fbbf24',
+                  svg: `<path d="M 120 75 L 130 55 L 140 70 L 150 45 L 160 70 L 170 55 L 180 75 Z" fill="url(#gold)"/>
+                        <circle cx="130" cy="55" r="2" fill="#ef4444"/><circle cx="150" cy="45" r="3" fill="#3b82f6"/><circle cx="170" cy="55" r="2" fill="#ef4444"/>`,
+                  icon: `<rect x="10" y="10" width="30" height="30" rx="5" fill="#fbbf24"/>` }
+            ]
+        };
+
+        let currentActiveTab = 'hair';
+        const currentOutfit = { hair: 'h1', top: 't1', bottom: 'b1', shoes: 's1', accessory: 'a0' };
+
+        function applyDefaultLook() {
+            Object.keys(currentOutfit).forEach(cat => applyItem(cat, currentOutfit[cat], false));
+        }
+
+        function changeTab(category) {
+            playPop();
+            const tabs = ['hair', 'top', 'bottom', 'shoes', 'accessory'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if(t === category) {
+                    btn.classList.add('active', 'text-pink-600');
+                    btn.classList.remove('text-gray-400');
+                } else {
+                    btn.classList.remove('active', 'text-pink-600');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+            currentActiveTab = category;
+            renderWardrobe();
+        }
+
+        function renderWardrobe() {
+            const container = document.getElementById('items-container');
+            container.innerHTML = ''; 
+
+            wardrobe[currentActiveTab].forEach(item => {
+                const isSelected = currentOutfit[currentActiveTab] === item.id;
+                const card = document.createElement('div');
+                card.className = `item-card p-3 aspect-square ${isSelected ? 'selected' : ''}`;
+                
+                const iconSvg = document.createElement('div');
+                iconSvg.className = 'w-10 h-10 md:w-12 md:h-12 rounded-full mb-2 shadow-sm border-2 border-white relative z-10 flex items-center justify-center bg-gray-50';
+                iconSvg.innerHTML = `<svg viewBox="0 0 50 50" class="w-full h-full">${item.icon}</svg>`;
+
+                const nameLabel = document.createElement('span');
+                nameLabel.className = 'text-xs md:text-sm font-bold text-gray-700 text-center relative z-10 leading-tight';
+                nameLabel.innerText = item.name;
+
+                card.onclick = () => {
+                    playPop();
+                    applyItem(currentActiveTab, item.id, true);
+                    renderWardrobe();
+                };
+
+                card.appendChild(iconSvg);
+                card.appendChild(nameLabel);
+                container.appendChild(card);
+            });
+        }
+
+        function triggerSparkle() {
+            const sparkles = document.getElementById('magic-sparkles');
+            sparkles.classList.remove('active');
+            void sparkles.offsetWidth; 
+            sparkles.classList.add('active');
+        }
+
+        function applyItem(category, itemId, withEffect = false) {
+            currentOutfit[category] = itemId;
+            const itemData = wardrobe[category].find(i => i.id === itemId);
+            
+            if(itemData) {
+                if (category === 'hair') {
+                    document.getElementById('doll-hair-back').innerHTML = itemData.back;
+                    document.getElementById('doll-hair-front').innerHTML = itemData.front;
+                } else {
+                    document.getElementById(`doll-${category}`).innerHTML = itemData.svg;
+                }
+                
+                if(withEffect) triggerSparkle();
+            }
+        }
+
+        const canvas = document.getElementById("confetti-canvas");
+        const ctx = canvas.getContext("2d");
+        let particles = [];
+        const colors = ["#f472b6", "#3b82f6", "#10b981", "#fbbf24", "#8b5cf6"];
+        let animationId;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+
+        function startConfetti() {
+            resize();
+            canvas.style.opacity = 1;
+            particles = [];
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * 150 + 10,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.floor(Math.random() * 10) - 10,
+                    tiltAngleInc: (Math.random() * 0.07) + 0.05,
+                    tiltAngle: 0
+                });
+            }
+            cancelAnimationFrame(animationId);
+            drawConfetti();
+            
+            setTimeout(() => {
+                let fade = setInterval(() => {
+                    canvas.style.opacity = parseFloat(canvas.style.opacity) - 0.05;
+                    if (canvas.style.opacity <= 0) {
+                        clearInterval(fade);
+                        particles = [];
+                        cancelAnimationFrame(animationId);
+                    }
+                }, 50);
+            }, 4000);
+        }
+
+        function drawConfetti() {
+            if(particles.length === 0) return;
+            animationId = requestAnimationFrame(drawConfetti);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((p) => {
+                p.tiltAngle += p.tiltAngleInc;
+                p.y += (Math.cos(p.d) + 1 + p.r / 2) / 2;
+                p.x += Math.sin(p.tiltAngle);
+
+                ctx.beginPath();
+                ctx.lineWidth = p.r;
+                ctx.strokeStyle = p.color;
+                ctx.moveTo(p.x + p.tilt + p.r, p.y);
+                ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+                ctx.stroke();
+
+                if (p.y > canvas.height) {
+                    p.x = Math.random() * canvas.width;
+                    p.y = -20;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

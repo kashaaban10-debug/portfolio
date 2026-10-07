@@ -2,7 +2,7 @@ const crypto = require('node:crypto');
 const sources = {facebook:'فيسبوك',whatsapp:'واتساب',instagram:'إنستجرام',search:'بحث',friend:'صديق',lesson:'الحصة',other:'مصدر آخر',direct:'مباشر أو غير معروف'};
 const limits=new Map(),sent=new Map(),pending=new Set();
 const clean=(v,n)=>String(v||'').normalize('NFKC').replace(/[\u0000-\u001f\u007f<>\u202a-\u202e\u2066-\u2069]/g,'').trim().slice(0,n);
-const token=()=>String(process.env.TELEGRAM_BOT_TOKEN||'').trim();
+const token=()=>String(process.env.TELEGRAM_BOT_TOKEN||'').replace(/[\s\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g,'').trim();
 const enabled=()=>Boolean(token()&&/^\d+$/.test(process.env.TELEGRAM_CHAT_ID||''));
 const sign=text=>crypto.createHmac('sha256',token()).update(text).digest('hex');
 const peer=req=>crypto.createHash('sha256').update(String(req.headers['x-forwarded-for']||req.socket?.remoteAddress||'unknown').split(',')[0]).digest('hex');
